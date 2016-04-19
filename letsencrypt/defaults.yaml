@@ -3,3 +3,6 @@
 letsencrypt:
   cli_install_dir: /opt/letsencrypt
   package: letsencrypt
+  cron:
+    minute: random
+    hour: random

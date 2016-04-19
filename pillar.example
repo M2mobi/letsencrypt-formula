@@ -20,3 +20,6 @@ letsencrypt:
   server:
     start: 'systemctl start nginx'
     stop: 'systemctl stop nginx'
+  cron:
+    minute: 10
+    hour: 2
