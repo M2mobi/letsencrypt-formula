@@ -1,4 +1,5 @@
 letsencrypt:
+  use_package: true
   config: |
     server = https://acme-v01.api.letsencrypt.org/directory
     email = webmaster@example.com
