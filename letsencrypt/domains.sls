@@ -30,6 +30,12 @@
     - require:
       - file: /usr/local/bin/check_letsencrypt_cert.sh
 
+{% if salt['pillar.get']('letsencrypt:use_package', '') == true %}
+  {% set letsencrypt_command = "letsencrypt" %}
+{% else %}
+  {% set letsencrypt_command = letsencrypt.cli_install_dir + "/letsencrypt-auto" %}
+{% endif %}
+
 {%
   for setname, domainlist in salt['pillar.get'](
     'letsencrypt:domainsets'
@@ -39,10 +45,7 @@
 create-initial-cert-{{ setname }}-{{ domainlist | join('+') }}:
   cmd.run:
     - unless: /usr/local/bin/check_letsencrypt_cert.sh {{ domainlist|join(' ') }}
-    - name: {{
-          letsencrypt.cli_install_dir
-        }}/letsencrypt-auto --quiet -d {{ domainlist|join(' -d ') }} certonly --non-interactive
-    - cwd: {{ letsencrypt.cli_install_dir }}
+    - name: {{ letsencrypt_command }} --quiet -d {{ domainlist|join(' -d ') }} certonly --non-interactive
     - require:
       - file: letsencrypt-config
       - file: /usr/local/bin/check_letsencrypt_cert.sh

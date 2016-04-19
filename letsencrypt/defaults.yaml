@@ -2,3 +2,4 @@
 # vim: ft=yaml
 letsencrypt:
   cli_install_dir: /opt/letsencrypt
+  package: letsencrypt
