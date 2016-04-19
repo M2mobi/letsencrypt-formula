@@ -18,4 +18,3 @@ letsencrypt:
     minute: random
     hour: random
     dayweek: '*'
-
