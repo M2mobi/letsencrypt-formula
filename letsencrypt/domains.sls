@@ -3,30 +3,17 @@
 
 {% from "letsencrypt/map.jinja" import letsencrypt with context %}
 
-
-/usr/local/bin/check_letsencrypt_cert.sh:
-  file.managed:
-    - mode: 755
-    - contents: |
-        #!/bin/bash
-
-        FIRST_CERT=$1
-
-        for DOMAIN in "$@"
-        do
-            openssl x509 -in /etc/letsencrypt/live/$1/cert.pem -noout -text | grep DNS:${DOMAIN} > /dev/null || exit 1
-        done
-        CERT=$(date -d "$(openssl x509 -in /etc/letsencrypt/live/$1/cert.pem -enddate -noout | cut -d'=' -f2)" "+%s")
-        CURRENT=$(date "+%s")
-        REMAINING=$((($CERT - $CURRENT) / 60 / 60 / 24))
-        [ "$REMAINING" -gt "30" ] || exit 1
-        echo Domains $@ are in cert and cert is valid for $REMAINING days
-
 {% if salt['pillar.get']('letsencrypt:use_package', '') == true %}
   {% set letsencrypt_command = "letsencrypt" %}
 {% else %}
   {% set letsencrypt_command = letsencrypt.cli_install_dir + "/letsencrypt-auto" %}
 {% endif %}
+
+check-letsencrypt-cert:
+  file.managed:
+    - name: /usr/local/bin/check_letsencrypt_cert.sh
+    - mode: 755
+    - source: salt://letsencrypt/files/check_letsencrypt_cert.sh
 
 {%
   for setname, domainlist in salt['pillar.get'](
@@ -40,7 +27,7 @@ create-initial-cert-{{ setname }}-{{ domainlist | join('+') }}:
     - name: {{ letsencrypt_command }} -d {{ domainlist|join(' -d ') }} certonly
     - require:
       - file: letsencrypt-config
-      - file: /usr/local/bin/check_letsencrypt_cert.sh
+      - file: check-letsencrypt-cert
 
 letsencrypt-crontab-{{ setname }}-{{ domainlist[0] }}:
   cron.present:
