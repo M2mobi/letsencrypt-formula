@@ -3,6 +3,7 @@
 
 {% from "letsencrypt/map.jinja" import letsencrypt with context %}
 
+<<<<<<< HEAD
 {% if letsencrypt.use_package %}
   # Renew checks if the cert exists and needs to be renewed
   {% set check_cert_cmd = '/usr/bin/certbot renew --dry-run --cert-name' %}
