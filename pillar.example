@@ -17,4 +17,6 @@ letsencrypt:
       - mail.example.com
     intranet:
       - intranet.example.com
-
+  server:
+    start: 'systemctl start nginx'
+    stop: 'systemctl stop nginx'
