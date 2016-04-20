@@ -37,3 +37,6 @@ letsencrypt:
     minute: 10
     hour: 2
     dayweek: 1
+  server:
+    start: 'systemctl start nginx'
+    stop: 'systemctl stop nginx'
