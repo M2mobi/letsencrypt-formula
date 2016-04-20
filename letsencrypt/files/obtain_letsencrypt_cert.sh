@@ -9,7 +9,7 @@ do
 done
 
 {{ stop_server if stop_server else '' }}
-{{ letsencrypt_command }} --quiet $PARAMETERS certonly --non-interactive >> "$LOG_FILE" 2>&1
+{{ letsencrypt_command }} certonly --quiet $PARAMETERS --non-interactive >> "$LOG_FILE" 2>&1
 LE_STATUS=$?
 {{ start_server if start_server else '' }}
 
