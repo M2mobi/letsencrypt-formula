@@ -17,6 +17,17 @@
     - require:
       - file: /usr/local/bin/check_letsencrypt_cert.sh
 
+/usr/local/bin/obtain_letsencrypt_cert.sh:
+  file.managed:
+    - name: /usr/local/bin/obtain_letsencrypt_cert.sh
+    - mode: 755
+    - template: jinja
+    - source: salt://letsencrypt/files/obtain_letsencrypt_cert.sh
+    - context:
+      letsencrypt_command: {{ letsencrypt_command }}
+      start_server: {{ letsencrypt.server.start if (letsencrypt.server is defined and letsencrypt.server.start is defined) else '' }}
+      stop_server: {{ letsencrypt.server.stop if (letsencrypt.server is defined and letsencrypt.server.stop is defined) else '' }}
+
 {% if salt['pillar.get']('letsencrypt:use_package', '') == true %}
   {% set letsencrypt_command = "letsencrypt" %}
 {% else %}
@@ -32,10 +43,11 @@
 create-initial-cert-{{ setname }}-{{ domainlist | join('+') }}:
   cmd.run:
     - unless: /usr/local/bin/check_letsencrypt_cert.sh {{ domainlist|join(' ') }}
-    - name: {{ letsencrypt_command }} --quiet -d {{ domainlist|join(' -d ') }} certonly --non-interactive
+    - name: /usr/local/bin/obtain_letsencrypt_cert.sh {{ domainlist|join(' ') }}
     - require:
       - file: letsencrypt-config
       - file: /usr/local/bin/check_letsencrypt_cert.sh
+      - file: /usr/local/bin/obtain_letsencrypt_cert.sh
 
 # domainlist[0] represents the "CommonName", and the rest
 # represent SubjectAlternativeNames
