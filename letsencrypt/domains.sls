@@ -9,15 +9,18 @@
   {% set letsencrypt_command = letsencrypt.cli_install_dir + "/letsencrypt-auto" %}
 {% endif %}
 
+{% set check_letsencrypt_cert = "/usr/local/bin/check_letsencrypt_cert.sh" %}
+{% set obtain_letsencrypt_cert  = "/usr/local/bin/obtain_letsencrypt_cert.sh" %}
+
 check-letsencrypt-cert:
   file.managed:
-    - name: /usr/local/bin/check_letsencrypt_cert.sh
+    - name: {{ check_letsencrypt_cert }}
     - mode: 755
     - source: salt://letsencrypt/files/check_letsencrypt_cert.sh
 
 obtain-letsencrypt-cert:
   file.managed:
-    - name: /usr/local/bin/obtain_letsencrypt_cert.sh
+    - name: {{ obtain_letsencrypt_cert }}
     - mode: 755
     - template: jinja
     - source: salt://letsencrypt/files/obtain_letsencrypt_cert.sh
@@ -34,8 +37,8 @@ obtain-letsencrypt-cert:
 
 create-initial-cert-{{ setname }}-{{ domainlist | join('+') }}:
   cmd.run:
-    - unless: /usr/local/bin/check_letsencrypt_cert.sh {{ domainlist|join(' ') }}
-    - name: /usr/local/bin/obtain_letsencrypt_cert.sh {{ domainlist|join(' ') }}
+    - unless: {{ check_letsencrypt_cert }} {{ domainlist|join(' ') }}
+    - name: {{ obtain_letsencrypt_cert }} {{ domainlist|join(' ') }}
     - require:
       - file: letsencrypt-config
       - file: check-letsencrypt-cert
@@ -43,7 +46,7 @@ create-initial-cert-{{ setname }}-{{ domainlist | join('+') }}:
 
 letsencrypt-crontab-{{ setname }}-{{ domainlist[0] }}:
   cron.present:
-    - name: /usr/local/bin/check_letsencrypt_cert.sh {{ domainlist|join(' ') }} > /dev/null || /usr/local/bin/obtain_letsencrypt_cert.sh {{ domainlist|join(' ') }}
+    - name: {{ check_letsencrypt_cert }} {{ domainlist|join(' ') }} > /dev/null || {{ obtain_letsencrypt_cert }} {{ domainlist|join(' ') }}
     - month: '*'
     - minute: {{ letsencrypt.cron.minute }}
     - hour: {{ letsencrypt.cron.hour }}
