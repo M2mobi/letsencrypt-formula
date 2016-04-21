@@ -3,6 +3,8 @@
 PARAMETERS=''
 LOG_FILE='/var/log/letsencrypt/letsencrypt.log'
 
+[ ! -d '/var/log/letsencrypt/' ] && mkdir '/var/log/letsencrypt'
+
 for DOMAIN in "$@"
 do
     PARAMETERS="$PARAMETERS -d $DOMAIN"
