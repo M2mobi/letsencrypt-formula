@@ -9,23 +9,23 @@
   {% set letsencrypt_command = letsencrypt.cli_install_dir + "/letsencrypt-auto" %}
 {% endif %}
 
-{% set check_letsencrypt_cert = "/usr/local/bin/check_letsencrypt_cert.sh" %}
-{% set obtain_letsencrypt_cert  = "/usr/local/bin/obtain_letsencrypt_cert.sh" %}
+{% set letsencrypt_check_cert = "/usr/local/bin/letsencrypt_check_cert.sh" %}
+{% set letsencrypt_obtain_cert  = "/usr/local/bin/letsencrypt_obtain_cert.sh" %}
 {% set letsencrypt_cronjob  = "/usr/local/bin/letsencrypt_cronjob.sh" %}
 {% set domainsets = salt['pillar.get']('letsencrypt:domainsets') %}
 
-check-letsencrypt-cert:
+letsencrypt-check-cert:
   file.managed:
-    - name: {{ check_letsencrypt_cert }}
+    - name: {{ letsencrypt_check_cert }}
     - mode: 755
-    - source: salt://letsencrypt/files/check_letsencrypt_cert.sh
+    - source: salt://letsencrypt/files/letsencrypt_check_cert.sh
 
-obtain-letsencrypt-cert:
+letsencrypt-obtain-cert:
   file.managed:
-    - name: {{ obtain_letsencrypt_cert }}
+    - name: {{ letsencrypt_obtain_cert }}
     - mode: 755
     - template: jinja
-    - source: salt://letsencrypt/files/obtain_letsencrypt_cert.sh
+    - source: salt://letsencrypt/files/letsencrypt_obtain_cert.sh
     - context:
       letsencrypt_command: {{ letsencrypt_command }}
 
@@ -45,12 +45,12 @@ webserver-running:
 
 create-initial-cert-{{ setname }}-{{ domainlist | join('+') }}:
   cmd.run:
-    - unless: {{ check_letsencrypt_cert }} {{ domainlist|join(' ') }}
-    - name: {{ obtain_letsencrypt_cert }} {{ domainlist|join(' ') }}
+    - unless: {{ letsencrypt_check_cert }} {{ domainlist|join(' ') }}
+    - name: {{ letsencrypt_obtain_cert }} {{ domainlist|join(' ') }}
     - require:
       - file: letsencrypt-config
-      - file: check-letsencrypt-cert
-      - file: obtain-letsencrypt-cert
+      - file: letsencrypt-check-cert
+      - file: letsencrypt-obtain-cert
 {% if letsencrypt.webserver is defined %}
       - service: webserver-dead
 {% endif %}
@@ -69,8 +69,8 @@ letsencrypt-cronjob:
     - template: jinja
     - source: salt://letsencrypt/files/letsencrypt_cronjob.sh
     - context:
-      check_letsencrypt_cert: {{ check_letsencrypt_cert }}
-      obtain_letsencrypt_cert: {{ obtain_letsencrypt_cert }}
+      letsencrypt_check_cert: {{ letsencrypt_check_cert }}
+      letsencrypt_obtain_cert: {{ letsencrypt_obtain_cert }}
       domainsets: {{ domainsets }}
 {% if letsencrypt.webserver is defined %}
       webserver_start: {{ letsencrypt.webserver.start }}
