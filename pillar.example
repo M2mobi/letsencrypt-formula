@@ -37,9 +37,7 @@ letsencrypt:
     minute: 10
     hour: 2
     dayweek: 1
-  server:
+  webserver:
+    name: nginx
     start: 'systemctl start nginx'
     stop: 'systemctl stop nginx'
-  cron:
-    minute: 10
-    hour: 2
