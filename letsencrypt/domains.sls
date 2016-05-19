@@ -83,5 +83,9 @@ letsencrypt-crontab:
     - month: '*'
     - minute: {{ letsencrypt.cron.minute }}
     - hour: {{ letsencrypt.cron.hour }}
+{% if 'dayweek' in letsencrypt.cron %}
+    - dayweek: {{ letsencrypt.cron.dayweek }}
+{% else %}
     - dayweek: '*'
+{% endif %}
     - identifier: letsencrypt-cronjob
