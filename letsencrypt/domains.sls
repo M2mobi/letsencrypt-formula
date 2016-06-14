@@ -31,7 +31,7 @@
       letsencrypt_command: {{ letsencrypt_command }}
 
 {% if salt['pillar.get']('letsencrypt:use_package', '') == true %}
-  {% set letsencrypt_command = "letsencrypt" %}
+  {% set letsencrypt_command = "certbot" %}
 {% else %}
   {% set letsencrypt_command = letsencrypt.cli_install_dir + "/letsencrypt-auto" %}
 {% endif %}

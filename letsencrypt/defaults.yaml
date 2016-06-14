@@ -2,7 +2,7 @@
 # vim: ft=yaml
 letsencrypt:
   cli_install_dir: /opt/letsencrypt
-  package: letsencrypt
+  package: certbot
   cron:
     minute: random
     hour: random
