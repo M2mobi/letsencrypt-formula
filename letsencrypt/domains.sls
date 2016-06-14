@@ -4,9 +4,9 @@
 {% from "letsencrypt/map.jinja" import letsencrypt with context %}
 
 {% if salt['pillar.get']('letsencrypt:use_package', '') == true %}
-  {% set letsencrypt_command = "letsencrypt" %}
+  {% set letsencrypt_command = "certbot" %}
 {% else %}
-  {% set letsencrypt_command = letsencrypt.cli_install_dir + "/letsencrypt-auto" %}
+  {% set letsencrypt_command = letsencrypt.cli_install_dir + "/certbot-auto" %}
 {% endif %}
 
 {% set letsencrypt_check_cert = "/usr/local/bin/letsencrypt_check_cert.sh" %}
