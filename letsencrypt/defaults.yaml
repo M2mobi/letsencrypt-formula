@@ -14,6 +14,7 @@ letsencrypt:
     mode: 755
   post_renew:
     cmds:
+  package: certbot
   cron:
     minute: random
     hour: random

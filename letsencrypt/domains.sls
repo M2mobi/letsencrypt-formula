@@ -23,18 +23,27 @@
   {% set create_cert_cmd = letsencrypt.cli_install_dir ~ '/letsencrypt-auto' %}
 {% endif %}
 {% set letsencrypt_cronjob  = "/usr/local/bin/letsencrypt_cronjob.sh" %}
+{% if salt['pillar.get']('letsencrypt:use_package', '') == true %}
+  {% set letsencrypt_command = "certbot" %}
+{% else %}
+  {% set letsencrypt_command = letsencrypt.cli_install_dir + "/letsencrypt-auto" %}
+{% endif %}
 
 {{ check_cert_cmd }}:
   file.{{ old_check_cert_cmd_state }}:
     - template: jinja
     - source: salt://letsencrypt/files/check_letsencrypt_cert.sh.jinja
     - mode: 755
+    - context:
+      letsencrypt_command: {{ letsencrypt_command }}
 
 {{ renew_cert_cmd }}:
   file.{{ old_renew_cert_cmd_state }}:
     - template: jinja
     - source: salt://letsencrypt/files/renew_letsencrypt_cert.sh.jinja
     - mode: 755
+    - context:
+      letsencrypt_command: {{ letsencrypt_command }}
     - require:
       - file: {{ check_cert_cmd }}
 
