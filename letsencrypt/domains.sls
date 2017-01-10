@@ -9,6 +9,12 @@
 {% set letsencrypt_cronjob  = "/usr/local/bin/letsencrypt_cronjob.sh" %}
 {% set domainsets = salt['pillar.get']('letsencrypt:domainsets') %}
 
+{% if salt['pillar.get']('letsencrypt:use_package', '') == true %}
+  {% set letsencrypt_command = "certbot" %}
+{% else %}
+  {% set letsencrypt_command = letsencrypt.cli_install_dir + "/letsencrypt-auto" %}
+{% endif %}
+
 /usr/local/bin/check_letsencrypt_cert.sh:
   file.managed:
     - mode: 755
@@ -29,12 +35,6 @@
     - source: salt://letsencrypt/files/obtain_letsencrypt_cert.sh
     - context:
       letsencrypt_command: {{ letsencrypt_command }}
-
-{% if salt['pillar.get']('letsencrypt:use_package', '') == true %}
-  {% set letsencrypt_command = "certbot" %}
-{% else %}
-  {% set letsencrypt_command = letsencrypt.cli_install_dir + "/letsencrypt-auto" %}
-{% endif %}
 
 {% if letsencrypt.webserver is defined %}
 webserver-dead:
