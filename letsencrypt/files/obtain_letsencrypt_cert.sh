@@ -10,7 +10,7 @@ do
     PARAMETERS="$PARAMETERS -d $DOMAIN"
 done
 
-{{ letsencrypt_command }} certonly --quiet $PARAMETERS --non-interactive >> "$LOG_FILE" 2>&1
+{{ letsencrypt_command }} certonly --quiet $PARAMETERS --non-interactive --expand >> "$LOG_FILE" 2>&1
 
 if [ $? != 0 ]; then
     echo Failed to obtain cert, see "$LOG_FILE"

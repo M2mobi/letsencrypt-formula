@@ -1,19 +1,34 @@
 #!/bin/bash
 {% from "letsencrypt/map.jinja" import letsencrypt with context %}
 {%- if salt['pillar.get']('letsencrypt:use_package', '') == true %}
-  {%- set letsencrypt_command = "letsencrypt" %}
-{%- else %}
-  {%- set letsencrypt_command = letsencrypt.cli_install_dir + "/letsencrypt-auto" %}
-{%- endif %}
+  # Renew checks if the cert exists and needs to be renewed
+  {% set check_cert_cmd = '/usr/bin/certbot renew --dry-run --cert-name' %}
+  {% set renew_cert_cmd = '/usr/bin/certbot renew' %}
+  {% set obtain_cert_cmd = '/usr/bin/certbot' %}
+  {% set letsencrypt_command = "certbot" %}
+{% else %}
+  {% set check_cert_cmd = '/usr/local/bin/check_letsencrypt_cert.sh' %}
+  {% set renew_cert_cmd = '/usr/local/bin/renew_letsencrypt_cert.sh' %}
+  {% set obtain_cert_cmd = '/usr/local/bin/obtain_letsencrypt_cert.sh' %}
+  {% set letsencrypt_command = letsencrypt.cli_install_dir + "/letsencrypt-auto" %}
+{% endif %}
 COMMON_NAME="$1"
+JOINED=""
+for DOMAIN in "$@"
+do
+    JOINED+=" -d $DOMAIN"
+done
 
-{{ letsencrypt.cli_install_dir }}/letsencrypt-auto renew --non-interactive || exit 1
-  cat {{ letsencrypt.config_dir.path }}/live/${COMMON_NAME}/fullchain.pem \
-  {{ letsencrypt.config_dir.path }}/live/${COMMON_NAME}/privkey.pem \
-  > {{ letsencrypt.config_dir.path }}/live/${COMMON_NAME}/fullchain-privkey.pem || exit 1
-  chmod 600 {{ letsencrypt.config_dir.path }}/live/${COMMON_NAME}/fullchain-privkey.pem || exit 1
+if ! {{ check_cert_cmd }} "$@" > /dev/null
+then
+    {{ letsencrypt_command }} certonly $JOINED --non-interactive --expand || exit 1
+    cat {{ letsencrypt.config_dir.path }}/live/${COMMON_NAME}/fullchain.pem \
+        {{ letsencrypt.config_dir.path }}/live/${COMMON_NAME}/privkey.pem \
+        > {{ letsencrypt.config_dir.path }}/live/${COMMON_NAME}/fullchain-privkey.pem || exit 1
+    chmod 600 {{ letsencrypt.config_dir.path }}/live/${COMMON_NAME}/fullchain-privkey.pem || exit 1
 {%- if letsencrypt.post_renew.cmds %}
   {%- for cmd in letsencrypt.post_renew.cmds %}
     {{ cmd }}
   {%- endfor %}
 {%- endif %}
+fi

@@ -7,25 +7,24 @@
   # Renew checks if the cert exists and needs to be renewed
   {% set check_cert_cmd = '/usr/bin/certbot renew --dry-run --cert-name' %}
   {% set renew_cert_cmd = '/usr/bin/certbot renew' %}
+  {% set obtain_cert_cmd = '/usr/bin/certbot' %}
+  {% set letsencrypt_cronjob  = "/usr/local/bin/letsencrypt_cronjob.sh" %}
   {% set old_check_cert_cmd_state = 'absent' %}
   {% set old_renew_cert_cmd_state = 'absent' %}
   {% set old_obtain_cert_cmd_state = 'absent' %}
   {% set old_cron_state = 'absent' %}
   {% set create_cert_cmd = '/usr/bin/certbot' %}
+  {% set letsencrypt_command = "certbot" %}
 {% else %}
   {% set check_cert_cmd = '/usr/local/bin/check_letsencrypt_cert.sh' %}
   {% set renew_cert_cmd = '/usr/local/bin/renew_letsencrypt_cert.sh' %}
   {% set obtain_cert_cmd = '/usr/local/bin/obtain_letsencrypt_cert.sh' %}
+  {% set letsencrypt_cronjob  = "/usr/local/bin/letsencrypt_cronjob.sh" %}
   {% set old_check_cert_cmd_state = 'managed' %}
   {% set old_renew_cert_cmd_state = 'managed' %}
   {% set old_obtain_cert_cmd_state = 'managed' %}
   {% set old_cron_state = 'present' %}
   {% set create_cert_cmd = letsencrypt.cli_install_dir ~ '/letsencrypt-auto' %}
-{% endif %}
-{% set letsencrypt_cronjob  = "/usr/local/bin/letsencrypt_cronjob.sh" %}
-{% if salt['pillar.get']('letsencrypt:use_package', '') == true %}
-  {% set letsencrypt_command = "certbot" %}
-{% else %}
   {% set letsencrypt_command = letsencrypt.cli_install_dir + "/letsencrypt-auto" %}
 {% endif %}
 
