@@ -15,7 +15,7 @@ done
 
 if ! /usr/local/bin/check_letsencrypt_cert.sh "$@" > /dev/null
 then
-    {{ letsencrypt_command }} certonly $JOINED --non-interactive || exit 1
+    {{ letsencrypt_command }} certonly $JOINED --non-interactive --expand || exit 1
     cat /etc/letsencrypt/live/${COMMON_NAME}/fullchain.pem \
         /etc/letsencrypt/live/${COMMON_NAME}/privkey.pem \
         > /etc/letsencrypt/live/${COMMON_NAME}/fullchain-privkey.pem || exit 1
