@@ -3,6 +3,12 @@
 
 {% from "letsencrypt/map.jinja" import letsencrypt with context %}
 
+letsencrypt-config-directory:
+  file.directory:
+    - name: /etc/letsencrypt
+    - user: {{ letsencrypt.config_permissions.user }}
+    - group: {{ letsencrypt.config_permissions.group }}
+
 letsencrypt-config:
   file.managed:
     - name: /etc/letsencrypt/cli.ini

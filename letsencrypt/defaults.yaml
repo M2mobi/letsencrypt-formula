@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 # vim: ft=yaml
 letsencrypt:
+  config_permissions:
+    user: root
+    group: root
   cli_install_dir: /opt/letsencrypt
   package: certbot
   cron:
