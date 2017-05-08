@@ -8,6 +8,7 @@
 {% set obtain_letsencrypt_cert  = "/usr/local/bin/obtain_letsencrypt_cert.sh" %}
 {% set letsencrypt_cronjob  = "/usr/local/bin/letsencrypt_cronjob.sh" %}
 {% set domainsets = salt['pillar.get']('letsencrypt:domainsets') %}
+{% set webroot = salt['pillar.get']('letsencrypt:webroot:path', '') %}
 
 {% if salt['pillar.get']('letsencrypt:use_package', '') == true %}
   {% set letsencrypt_command = "certbot" %}
@@ -27,6 +28,9 @@
     - mode: 755
     - require:
       - file: /usr/local/bin/check_letsencrypt_cert.sh
+    - context:
+      letsencrypt_command: {{ letsencrypt_command }}
+      webroot: '{{ webroot }}'
 
 /usr/local/bin/obtain_letsencrypt_cert.sh:
   file.managed:
@@ -35,6 +39,16 @@
     - source: salt://letsencrypt/files/obtain_letsencrypt_cert.sh
     - context:
       letsencrypt_command: {{ letsencrypt_command }}
+      webroot: '{{ webroot }}'
+
+{% if webroot != '' %}
+letsencrypt-webroot:
+  file.directory:
+    - name: {{ webroot }}/.well-known
+    - user: root
+    - group: root
+    - mode: 755
+{% endif %}
 
 {% if letsencrypt.webserver is defined %}
 webserver-dead:
@@ -60,6 +74,9 @@ create-initial-cert-{{ setname }}-{{ domainlist | join('+') }}:
       - file: /usr/local/bin/obtain_letsencrypt_cert.sh
 {% if letsencrypt.webserver is defined %}
       - service: webserver-dead
+{% endif %}
+{% if webroot != '' %}
+      - file: letsencrypt-webroot
 {% endif %}
     - require_in:
       - file: letsencrypt-crontab

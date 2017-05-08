@@ -1,13 +1,12 @@
 #!/bin/bash
-{% from "letsencrypt/map.jinja" import letsencrypt with context %}
-{%- if salt['pillar.get']('letsencrypt:use_package', '') == true %}
-  {%- set letsencrypt_command = "letsencrypt" %}
-{%- else %}
-  {%- set letsencrypt_command = letsencrypt.cli_install_dir + "/letsencrypt-auto" %}
-{%- endif %}
+
 COMMON_NAME="$1"
 
-JOINED=""
+{% if webroot != '' -%}
+JOINED='-w /var/www/html/'
+{% else -%}
+JOINED=''
+{% endif -%}
 for DOMAIN in "$@"
 do
     JOINED+=" -d $DOMAIN"
@@ -15,7 +14,11 @@ done
 
 if ! /usr/local/bin/check_letsencrypt_cert.sh "$@" > /dev/null
 then
-    {{ letsencrypt_command }} certonly $JOINED --non-interactive --expand || exit 1
+{% if webroot != '' -%}
+    {{ letsencrypt_command|indent(4,true) }} certonly --webroot $JOINED --non-interactive --expand || exit 1
+{%- else -%}
+    {{ letsencrypt_command|indent(4,true) }} certonly $JOINED --non-interactive --expand || exit 1
+{%- endif %}
     cat /etc/letsencrypt/live/${COMMON_NAME}/fullchain.pem \
         /etc/letsencrypt/live/${COMMON_NAME}/privkey.pem \
         > /etc/letsencrypt/live/${COMMON_NAME}/fullchain-privkey.pem || exit 1
