@@ -41,10 +41,11 @@
     - template: jinja
     - source: salt://letsencrypt/files/renew_letsencrypt_cert.sh.jinja
     - mode: 755
-    - context:
-      letsencrypt_command: {{ letsencrypt_command }}
     - require:
       - file: {{ check_cert_cmd }}
+    - context:
+      letsencrypt_command: {{ letsencrypt_command }}
+      webroot: '{{ webroot }}'
 
 {{ obtain_cert_cmd }}:
   file.{{ old_obtain_cert_cmd_state }}:
@@ -53,6 +54,18 @@
     - source: salt://letsencrypt/files/obtain_letsencrypt_cert.sh
     - context:
       letsencrypt_command: {{ letsencrypt_command }}
+{% if letsencrypt.webroot != None %}
+      webroot: '{{ webroot }}'
+{% endif %}
+
+{% if letsencrypt.webroot != None %}
+letsencrypt-webroot:
+  file.directory:
+    - name: {{ webroot }}/.well-known
+    - user: root
+    - group: root
+    - mode: 755
+{% endif %}
 
 {% if letsencrypt.webserver is defined %}
 webserver-dead:
@@ -101,6 +114,9 @@ letsencrypt-crontab-{{ setname }}-{{ domainlist[0] }}:
 
 {% if letsencrypt.webserver is defined %}
       - service: webserver-dead
+{% endif %}
+{% if webroot != '' %}
+      - file: letsencrypt-webroot
 {% endif %}
     - require_in:
       - file: letsencrypt-crontab

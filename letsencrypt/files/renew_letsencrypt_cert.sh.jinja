@@ -13,7 +13,12 @@
   {% set letsencrypt_command = letsencrypt.cli_install_dir + "/letsencrypt-auto" %}
 {% endif %}
 COMMON_NAME="$1"
-JOINED=""
+
+{% if webroot != '' -%}
+JOINED='-w /var/www/html/'
+{% else -%}
+JOINED=''
+{% endif -%}
 for DOMAIN in "$@"
 do
     JOINED+=" -d $DOMAIN"
@@ -21,7 +26,11 @@ done
 
 if ! {{ check_cert_cmd }} "$@" > /dev/null
 then
-    {{ letsencrypt_command }} certonly $JOINED --non-interactive --expand || exit 1
+{% if webroot != '' -%}
+    {{ letsencrypt_command|indent(4,true) }} certonly --webroot $JOINED --non-interactive --expand || exit 1
+{%- else -%}
+    {{ letsencrypt_command|indent(4,true) }} certonly $JOINED --non-interactive --expand || exit 1
+{%- endif %}
     cat {{ letsencrypt.config_dir.path }}/live/${COMMON_NAME}/fullchain.pem \
         {{ letsencrypt.config_dir.path }}/live/${COMMON_NAME}/privkey.pem \
         > {{ letsencrypt.config_dir.path }}/live/${COMMON_NAME}/fullchain-privkey.pem || exit 1
