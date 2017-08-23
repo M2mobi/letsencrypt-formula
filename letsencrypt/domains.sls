@@ -45,6 +45,8 @@
       - file: {{ check_cert_cmd }}
     - context:
       letsencrypt_command: {{ letsencrypt_command }}
+      letsencrypt_user: {{ letsencrypt.config_permissions.user }}
+      letsencrypt_group: {{ letsencrypt.config_permissions.group }}
       webroot: '{{ webroot }}'
 
 {{ obtain_cert_cmd }}:
@@ -132,6 +134,7 @@ create-fullchain-privkey-pem-for-{{ domainlist[0] }}:
             {{ letsencrypt.config_dir.path }}/live/{{ domainlist[0] }}/privkey.pem \
             > {{ letsencrypt.config_dir.path }}/live/{{ domainlist[0] }}/fullchain-privkey.pem && \
         chmod 600 {{ letsencrypt.config_dir.path }}/live/{{ domainlist[0] }}/fullchain-privkey.pem
+        chown {{ letsencrypt.config_permissions.user }}:{{ letsencrypt.config_permissions.group }} {{ letsencrypt.config_dir.path }}/live/{{ domainlist[0] }}/fullchain-privkey.pem
     - creates: {{ letsencrypt.config_dir.path }}/live/{{ domainlist[0] }}/fullchain-privkey.pem
     - require:
       - cmd: create-initial-cert-{{ setname }}-{{ domainlist | join('+') }}

@@ -10,6 +10,18 @@ letsencrypt-config-directory:
     - group: {{ letsencrypt.config_dir.group }}
     - dir_mode: {{ letsencrypt.config_dir.mode }}
 
+letsencrypt-archive-directory:
+  file.directory:
+    - name: /etc/letsencrypt/archive
+    - user: {{ letsencrypt.config_permissions.user }}
+    - group: {{ letsencrypt.config_permissions.group }}
+
+letsencrypt-live-directory:
+  file.directory:
+    - name: /etc/letsencrypt/live
+    - user: {{ letsencrypt.config_permissions.user }}
+    - group: {{ letsencrypt.config_permissions.group }}
+
 letsencrypt-config:
   file.managed:
     - name: {{ letsencrypt.config_dir.path }}/cli.ini

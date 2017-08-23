@@ -35,6 +35,7 @@ then
         {{ letsencrypt.config_dir.path }}/live/${COMMON_NAME}/privkey.pem \
         > {{ letsencrypt.config_dir.path }}/live/${COMMON_NAME}/fullchain-privkey.pem || exit 1
     chmod 600 {{ letsencrypt.config_dir.path }}/live/${COMMON_NAME}/fullchain-privkey.pem || exit 1
+    chown {{ letsencrypt_user }}:{{ letsencrypt_group }} {{ letsencrypt.config_dir.path }}/live/${COMMON_NAME}/fullchain-privkey.pem || exit 1
 {%- if letsencrypt.post_renew.cmds %}
   {%- for cmd in letsencrypt.post_renew.cmds %}
     {{ cmd }}
