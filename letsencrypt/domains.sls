@@ -30,6 +30,8 @@
       - file: /usr/local/bin/check_letsencrypt_cert.sh
     - context:
       letsencrypt_command: {{ letsencrypt_command }}
+      letsencrypt_user: {{ letsencrypt.config_permissions.user }}
+      letsencrypt_group: {{ letsencrypt.config_permissions.group }}
       webroot: '{{ webroot }}'
 
 /usr/local/bin/obtain_letsencrypt_cert.sh:
@@ -90,7 +92,8 @@ create-fullchain-privkey-pem-for-{{ domainlist[0] }}:
         cat /etc/letsencrypt/live/{{ domainlist[0] }}/fullchain.pem \
             /etc/letsencrypt/live/{{ domainlist[0] }}/privkey.pem \
             > /etc/letsencrypt/live/{{ domainlist[0] }}/fullchain-privkey.pem && \
-        chmod 600 /etc/letsencrypt/live/{{ domainlist[0] }}/fullchain-privkey.pem
+        chmod 600 /etc/letsencrypt/live/{{ domainlist[0] }}/fullchain-privkey.pem && \
+        chown {{ letsencrypt.config_permissions.user }}:{{ letsencrypt.config_permissions.group }} /etc/letsencrypt/live/{{ domainlist[0] }}/fullchain-privkey.pem
     - creates: /etc/letsencrypt/live/{{ domainlist[0] }}/fullchain-privkey.pem
     - require:
       - cmd: create-initial-cert-{{ setname }}-{{ domainlist | join('+') }}
