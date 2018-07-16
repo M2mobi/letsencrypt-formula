@@ -33,6 +33,10 @@
       letsencrypt_user: {{ letsencrypt.config_permissions.user }}
       letsencrypt_group: {{ letsencrypt.config_permissions.group }}
       webroot: '{{ webroot }}'
+{% if letsencrypt.webserver is defined %}
+      webserver_start: {{ letsencrypt.webserver.start }}
+      webserver_stop: {{ letsencrypt.webserver.stop }}
+{% endif %}
 
 /usr/local/bin/obtain_letsencrypt_cert.sh:
   file.managed:
