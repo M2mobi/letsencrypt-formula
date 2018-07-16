@@ -26,10 +26,16 @@ done
 
 if ! {{ check_cert_cmd }} "$@" > /dev/null
 then
+
+{% if webserver_start is defined and webserver_stop is defined -%}
+{% set hook = '--post-hook "'webserver_stop' && 'webserver_start'"' %}
+{%- else %}
+{% set hook = '' %}
+{%- endif %}
 {% if webroot != '' -%}
-    {{ letsencrypt_command|indent(4,true) }} certonly --webroot $JOINED --non-interactive --expand || exit 1
+    {{ letsencrypt_command|indent(4,true) }} certonly --webroot $JOINED --non-interactive --expand {{hook}} || exit 1
 {%- else -%}
-    {{ letsencrypt_command|indent(4,true) }} certonly $JOINED --non-interactive --expand || exit 1
+    {{ letsencrypt_command|indent(4,true) }} certonly $JOINED --non-interactive --expand {{hook}} || exit 1
 {%- endif %}
     cat {{ letsencrypt.config_dir.path }}/live/${COMMON_NAME}/fullchain.pem \
         {{ letsencrypt.config_dir.path }}/live/${COMMON_NAME}/privkey.pem \
