@@ -16,7 +16,7 @@ if ! /usr/local/bin/check_letsencrypt_cert.sh "$@" > /dev/null
 then
 
 {% if webserver_start is defined and webserver_stop is defined -%}
-{% set hook = '--post-hook "'webserver_stop' && 'webserver_start'"' %}
+{% set hook = '--post-hook "' + webserver_stop + ' && ' + webserver_start + '"' %}
 {%- else %}
 {% set hook = '' %}
 {%- endif %}

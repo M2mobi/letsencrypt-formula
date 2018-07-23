@@ -46,6 +46,8 @@
     - context:
       letsencrypt_command: {{ letsencrypt_command }}
       webroot: '{{ webroot }}'
+      dns: {{ letsencrypt.dns }}
+      standalone: {{ letsencrypt.standalone }}
 
 {% if webroot != '' %}
 letsencrypt-webroot:
