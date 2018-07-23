@@ -60,9 +60,9 @@
     - source: salt://letsencrypt/files/obtain_letsencrypt_cert.sh
     - context:
       letsencrypt_command: {{ letsencrypt_command }}
-{% if letsencrypt.webroot != None %}
-      webroot: '{{ webroot }}'
-{% endif %}
+      webroot: '{{ letsencrypt.webroot }}'
+      dns: {{ letsencrypt.dns }}
+      standalone: {{ letsencrypt.standalone }}
 
 {% if letsencrypt.webroot != None %}
 letsencrypt-webroot:

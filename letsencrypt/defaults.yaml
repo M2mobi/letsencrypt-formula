@@ -13,6 +13,9 @@ letsencrypt:
     user: root
     group: root
     mode: 755
+  dns: False
+  standalone: False
+  webroot: False
   post_renew:
     cmds:
   cron:
