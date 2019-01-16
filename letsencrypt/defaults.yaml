@@ -4,7 +4,7 @@
 letsencrypt:
   use_package: true
   pkgs:
-    - python3-certbot-apache
+    - certbot
   service: certbot.timer
   # Only used for the pkg install method (use_package: true), internal var
   _cli_path: /usr/bin/certbot
