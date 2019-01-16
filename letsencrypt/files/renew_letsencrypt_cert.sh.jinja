@@ -1,6 +1,6 @@
 #!/bin/bash
 {% from "letsencrypt/map.jinja" import letsencrypt with context %}
-{%- if salt['pillar.get']('letsencrypt:use_package', '') == true %}
+{%- if letsencrypt.use_package == True %}
   # Renew checks if the cert exists and needs to be renewed
   {% set check_cert_cmd = '/usr/bin/certbot renew --dry-run --cert-name' %}
   {% set renew_cert_cmd = '/usr/bin/certbot renew' %}

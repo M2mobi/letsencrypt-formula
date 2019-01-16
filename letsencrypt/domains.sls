@@ -13,7 +13,6 @@
   {% set old_renew_cert_cmd_state = 'absent' %}
   {% set old_obtain_cert_cmd_state = 'absent' %}
   {% set old_cron_state = 'absent' %}
-  {% set create_cert_cmd = '/usr/bin/certbot' %}
   {% set letsencrypt_command = "certbot" %}
 {% else %}
   {% set check_cert_cmd = '/usr/local/bin/check_letsencrypt_cert.sh' %}
@@ -24,7 +23,6 @@
   {% set old_renew_cert_cmd_state = 'managed' %}
   {% set old_obtain_cert_cmd_state = 'managed' %}
   {% set old_cron_state = 'present' %}
-  {% set create_cert_cmd = letsencrypt.cli_install_dir ~ '/letsencrypt-auto' %}
   {% set letsencrypt_command = letsencrypt.cli_install_dir + "/letsencrypt-auto" %}
 {% endif %}
 
@@ -45,9 +43,8 @@
       - file: {{ check_cert_cmd }}
     - context:
       letsencrypt_command: {{ letsencrypt_command }}
-      letsencrypt_user: {{ letsencrypt.config_permissions.user }}
-      letsencrypt_group: {{ letsencrypt.config_permissions.group }}
-      webroot: '{{ webroot }}'
+      letsencrypt_user: {{ letsencrypt.config_dir.user }}
+      letsencrypt_group: {{ letsencrypt.config_dir.group }}
 {% if letsencrypt.webserver is defined %}
       webserver_start: {{ letsencrypt.webserver.start }}
       webserver_stop: {{ letsencrypt.webserver.stop }}
@@ -57,12 +54,9 @@
   file.{{ old_obtain_cert_cmd_state }}:
     - mode: 755
     - template: jinja
-    - source: salt://letsencrypt/files/obtain_letsencrypt_cert.sh
+    - source: salt://letsencrypt/files/obtain_letsencrypt_cert.sh.jinja
     - context:
       letsencrypt_command: {{ letsencrypt_command }}
-      webroot: '{{ letsencrypt.webroot }}'
-      dns: {{ letsencrypt.dns }}
-      standalone: {{ letsencrypt.standalone }}
 
 {% if letsencrypt.webroot != None %}
 letsencrypt-webroot:
@@ -129,19 +123,6 @@ letsencrypt-crontab-{{ setname }}-{{ domainlist[0] }}:
 {% if letsencrypt.webserver is defined %}
       - service: webserver-running
 {% endif %}
-
-{% for setname, domainlist in letsencrypt.domainsets.items() %}
-create-fullchain-privkey-pem-for-{{ domainlist[0] }}:
-  cmd.run:
-    - name: |
-        cat {{ letsencrypt.config_dir.path }}/live/{{ domainlist[0] }}/fullchain.pem \
-            {{ letsencrypt.config_dir.path }}/live/{{ domainlist[0] }}/privkey.pem \
-            > {{ letsencrypt.config_dir.path }}/live/{{ domainlist[0] }}/fullchain-privkey.pem && \
-        chmod 600 {{ letsencrypt.config_dir.path }}/live/{{ domainlist[0] }}/fullchain-privkey.pem
-        chown {{ letsencrypt.config_permissions.user }}:{{ letsencrypt.config_permissions.group }} {{ letsencrypt.config_dir.path }}/live/{{ domainlist[0] }}/fullchain-privkey.pem
-    - creates: {{ letsencrypt.config_dir.path }}/live/{{ domainlist[0] }}/fullchain-privkey.pem
-    - require:
-      - cmd: create-initial-cert-{{ setname }}-{{ domainlist | join('+') }}
 {% endfor %}
 
 letsencrypt-cronjob:
@@ -149,7 +130,7 @@ letsencrypt-cronjob:
     - name: {{ letsencrypt_cronjob }}
     - mode: 755
     - template: jinja
-    - source: salt://letsencrypt/files/letsencrypt_cronjob.sh
+    - source: salt://letsencrypt/files/letsencrypt_cronjob.sh.jinja
     - context:
       renew_letsencrypt_cert: {{ renew_letsencrypt_cert }}
       domainsets: {{ letsencrypt.domainsets }}

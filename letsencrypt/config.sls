@@ -12,15 +12,15 @@ letsencrypt-config-directory:
 
 letsencrypt-archive-directory:
   file.directory:
-    - name: /etc/letsencrypt/archive
-    - user: {{ letsencrypt.config_permissions.user }}
-    - group: {{ letsencrypt.config_permissions.group }}
+    - name: {{ letsencrypt.config_dir.path }}/archive
+    - user: {{ letsencrypt.config_dir.user }}
+    - group: {{ letsencrypt.config_dir.group }}
 
 letsencrypt-live-directory:
   file.directory:
-    - name: /etc/letsencrypt/live
-    - user: {{ letsencrypt.config_permissions.user }}
-    - group: {{ letsencrypt.config_permissions.group }}
+    - name: {{ letsencrypt.config_dir.path }}/live
+    - user: {{ letsencrypt.config_dir.user }}
+    - group: {{ letsencrypt.config_dir.group }}
 
 letsencrypt-config:
   file.managed:

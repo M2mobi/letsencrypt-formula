@@ -1,11 +1,12 @@
 #!/bin/bash
+{% from "letsencrypt/map.jinja" import letsencrypt with context %}
 
 PARAMETERS=''
-{% if webroot != '' -%}
-PARAMETERS="$PARAMETERS --webroot -w {{webroot}}"
-{% elif dns == True -%}
+{% if letsencrypt.webroot != False -%}
+PARAMETERS="$PARAMETERS --webroot -w {{ letsencrypt.webroot }}"
+{% elif letsencrypt.webroot == True -%}
 PARAMETERS="$PARAMETERS --manual --preferred-challenges dns"
-{% elif standalone == True -%}
+{% elif letsencrypt.webroot == True -%}
 PARAMETERS="$PARAMETERS --standalone --preferred-challenges tls-sni"
 {% endif -%}
 LOG_FILE='/var/log/letsencrypt/letsencrypt.log'
