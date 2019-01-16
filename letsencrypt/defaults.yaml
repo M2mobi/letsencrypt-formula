@@ -3,6 +3,7 @@
 ---
 letsencrypt:
   use_package: true
+  use_wrapper: false
   pkgs:
     - certbot
   service: certbot.timer

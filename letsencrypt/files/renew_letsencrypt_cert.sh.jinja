@@ -1,14 +1,28 @@
 #!/bin/bash
 {% from "letsencrypt/map.jinja" import letsencrypt with context %}
+{% if letsencrypt.use_wrapper %}
+  {% set check_cert_cmd = '/usr/local/bin/check_letsencrypt_cert.sh' %}
+{% else %}
+  {% set check_cert_cmd = '/usr/bin/certbot renew --dry-run --cert-name' %}
+{% endif %}
+{% if letsencrypt.use_package %}
+  {% set letsencrypt_command = "certbot" %}
+{% else %}
+  {% set letsencrypt_command = letsencrypt.cli_install_dir + "/letsencrypt-auto" %}
+{% endif %}
 COMMON_NAME="$1"
 
-{{ letsencrypt.cli_install_dir }}/letsencrypt-auto renew --non-interactive || exit 1
-  cat {{ letsencrypt.config_dir.path }}/live/${COMMON_NAME}/fullchain.pem \
-  {{ letsencrypt.config_dir.path }}/live/${COMMON_NAME}/privkey.pem \
-  > {{ letsencrypt.config_dir.path }}/live/${COMMON_NAME}/fullchain-privkey.pem || exit 1
-  chmod 600 {{ letsencrypt.config_dir.path }}/live/${COMMON_NAME}/fullchain-privkey.pem || exit 1
+if ! {{ check_cert_cmd }} "$@" > /dev/null
+then
+    {{ letsencrypt_command|indent(4,true) }} renew --non-interactive --cert-name $COMMON_NAME || exit 1
+    cat {{ letsencrypt.config_dir.path }}/live/${COMMON_NAME}/fullchain.pem \
+        {{ letsencrypt.config_dir.path }}/live/${COMMON_NAME}/privkey.pem \
+        > {{ letsencrypt.config_dir.path }}/live/${COMMON_NAME}/fullchain-privkey.pem || exit 1
+    chmod 600 {{ letsencrypt.config_dir.path }}/live/${COMMON_NAME}/fullchain-privkey.pem || exit 1
+    chown {{ letsencrypt_user }}:{{ letsencrypt_group }} {{ letsencrypt.config_dir.path }}/live/${COMMON_NAME}/fullchain-privkey.pem || exit 1
 {%- if letsencrypt.post_renew.cmds %}
   {%- for cmd in letsencrypt.post_renew.cmds %}
     {{ cmd }}
   {%- endfor %}
 {%- endif %}
+fi
