@@ -113,3 +113,25 @@ create-fullchain-privkey-pem-for-{{ setname }}:
       - cmd: create-initial-cert-{{ setname }}-{{ domainlist | join('+') }}
 
 {% endfor %}
+
+letsencrypt-cronjob:
+  file.managed:
+    - name: {{ letsencrypt_cronjob }}
+    - mode: 755
+    - template: jinja
+    - source: salt://letsencrypt/files/letsencrypt_cronjob.sh.jinja
+
+# domainlist[0] represents the "CommonName", and the rest
+# represent SubjectAlternativeNames
+letsencrypt-crontab:
+  cron.present:
+    - name: {{ letsencrypt_cronjob }}
+    - month: '*'
+    - minute: {{ letsencrypt.cron.minute }}
+    - hour: {{ letsencrypt.cron.hour }}
+{% if 'dayweek' in letsencrypt.cron %}
+    - dayweek: {{ letsencrypt.cron.dayweek }}
+{% else %}
+    - dayweek: '*'
+{% endif %}
+    - identifier: letsencrypt-cronjob
