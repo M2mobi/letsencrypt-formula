@@ -14,7 +14,11 @@ COMMON_NAME="$1"
 
 if ! {{ check_cert_cmd }} "$@" > /dev/null
 then
+{% if letsencrypt.webroot != False -%}
+    {{ letsencrypt_command|indent(4,true) }} renew --webroot {{ letsencrypt.webroot.path }} $JOINED --non-interactive --cert-name $COMMON_NAME || exit 1
+{%- else -%}
     {{ letsencrypt_command|indent(4,true) }} renew --non-interactive --cert-name $COMMON_NAME || exit 1
+{%- endif %}
     cat {{ letsencrypt.config_dir.path }}/live/${COMMON_NAME}/fullchain.pem \
         {{ letsencrypt.config_dir.path }}/live/${COMMON_NAME}/privkey.pem \
         > {{ letsencrypt.config_dir.path }}/live/${COMMON_NAME}/fullchain-privkey.pem || exit 1

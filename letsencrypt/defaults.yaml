@@ -4,6 +4,10 @@
 letsencrypt:
   use_package: true
   use_wrapper: false
+  # The post_renew cmds are executed via renew_letsencrypt_cert.sh after every
+  # run. For more fine grain control, consider placing scripts in the pre,
+  # post, and/or deploy directories within /etc/letsencrypt/renewal-hooks/. For
+  # more information, see: https://certbot.eff.org/docs/using.html#renewal
   pkgs:
     - certbot
   service: certbot.timer
@@ -20,6 +24,9 @@ letsencrypt:
     user: root
     group: root
     mode: 755
+  dns: False
+  standalone: False
+  webroot: False
   config:
     server: https://acme-v02.api.letsencrypt.org/directory
     agree-tos: true
@@ -30,6 +37,7 @@ letsencrypt:
   # run. For more fine grain control, consider placing scripts in the pre,
   # post, and/or deploy directories within /etc/letsencrypt/renewal-hooks/. For
   # more information, see: https://certbot.eff.org/docs/using.html#renewal
+
   post_renew:
     cmds: []
   create_init_cert_subcmd: certonly

@@ -45,6 +45,15 @@
     - source: salt://letsencrypt/files/obtain_letsencrypt_cert.sh.jinja
 {% endif %}
 
+{% if letsencrypt.webroot != False %}
+letsencrypt-webroot:
+  file.directory:
+    - name: {{ webroot.path }}/.well-known
+    - user: root
+    - group: root
+    - mode: 755
+{% endif %}
+
 {% for setname, domainlist in letsencrypt.domainsets.items() %}
 # domainlist[0] represents the "CommonName", and the rest
 # represent SubjectAlternativeNames
@@ -69,6 +78,9 @@ create-initial-cert-{{ setname }}-{{ domainlist | join('+') }}:
 {% if letsencrypt.use_wrapper %}
       - file: {{ check_cert_cmd }}
       - file: {{ obtain_cert_cmd }}
+{% endif %}
+{% if letsencrypt.webroot != False %}
+      - file: letsencrypt-webroot
 {% endif %}
     - require_in:
       - file: letsencrypt-crontab

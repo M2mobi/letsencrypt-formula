@@ -9,7 +9,7 @@
 
 PARAMETERS=''
 {% if letsencrypt.webroot != False -%}
-PARAMETERS="$PARAMETERS --webroot -w {{ letsencrypt.webroot }}"
+PARAMETERS="$PARAMETERS --webroot -w {{ letsencrypt.webroot.path }}"
 {% elif letsencrypt.dns == True -%}
 PARAMETERS="$PARAMETERS --manual --preferred-challenges dns"
 {% elif letsencrypt.standalone == True -%}
