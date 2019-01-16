@@ -8,6 +8,12 @@
 {% endif %}
 
 PARAMETERS=''
+{%- if letsencrypt.post_hook.cmds %}
+PARAMETERS="$PARAMETERS --post-hook \" + {{ letsencrypt.post_hook.cmds|join(' && ') }} \""
+{%- endif %}
+{%- if letsencrypt.pre_hook.cmds %}
+PARAMETERS="$PARAMETERS --pre-hook \" + {{ letsencrypt.pre_hook.cmds|join(' && ') }} \""
+{%- endif %}
 {% if letsencrypt.webroot != False -%}
 PARAMETERS="$PARAMETERS --webroot -w {{ letsencrypt.webroot.path }}"
 {% elif letsencrypt.dns == True -%}

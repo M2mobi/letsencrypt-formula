@@ -41,6 +41,10 @@ letsencrypt:
   post_renew:
     cmds: []
   create_init_cert_subcmd: certonly
+  post_hook:
+    cmds: []
+  pre_hook:
+    cmds: []
   cron:
     minute: random
     hour: random

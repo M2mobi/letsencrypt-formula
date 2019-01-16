@@ -12,13 +12,23 @@
 {% endif %}
 COMMON_NAME="$1"
 
+PARAMETERS=''
+{%- if letsencrypt.post_hook.cmds %}
+PARAMETERS="$PARAMETERS --post-hook \" + {{ letsencrypt.post_hook.cmds|join(' && ') }} \""
+{%- endif %}
+{%- if letsencrypt.pre_hook.cmds %}
+PARAMETERS="$PARAMETERS --pre-hook \" + {{ letsencrypt.pre_hook.cmds|join(' && ') }} \""
+{%- endif %}
+{% if letsencrypt.webroot != False -%}
+PARAMETERS="$PARAMETERS --webroot -w {{ letsencrypt.webroot.path }}"
+{% elif letsencrypt.dns == True -%}
+PARAMETERS="$PARAMETERS --manual --preferred-challenges dns"
+{% elif letsencrypt.standalone == True -%}
+PARAMETERS="$PARAMETERS --standalone --preferred-challenges tls-sni"
+
 if ! {{ check_cert_cmd }} "$@" > /dev/null
 then
-{% if letsencrypt.webroot != False -%}
-    {{ letsencrypt_command|indent(4,true) }} renew --webroot {{ letsencrypt.webroot.path }} $JOINED --non-interactive --cert-name $COMMON_NAME || exit 1
-{%- else -%}
-    {{ letsencrypt_command|indent(4,true) }} renew --non-interactive --cert-name $COMMON_NAME || exit 1
-{%- endif %}
+    {{ letsencrypt_command|indent(4,true) }} renew --non-interactive --cert-name $COMMON_NAME $PARAMETERS || exit 1
     cat {{ letsencrypt.config_dir.path }}/live/${COMMON_NAME}/fullchain.pem \
         {{ letsencrypt.config_dir.path }}/live/${COMMON_NAME}/privkey.pem \
         > {{ letsencrypt.config_dir.path }}/live/${COMMON_NAME}/fullchain-privkey.pem || exit 1

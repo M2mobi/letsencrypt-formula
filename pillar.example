@@ -38,6 +38,15 @@ letsencrypt:
   #   agree-tos = True
   #   keep-until-expiring = True
   #   expand = True
+  config: |
+    server = https://acme-v01.api.letsencrypt.org/directory
+    email = webmaster@example.com
+    authenticator = webroot
+    webroot-path = /var/lib/www
+    agree-tos = True
+    renew-by-default = True
+  webroot:
+    path: /var/www/html
   config_dir:
     path: /etc/letsencrypt
     user: root
@@ -58,9 +67,12 @@ letsencrypt:
   # post, and/or deploy directories within /etc/letsencrypt/renewal-hooks/. For
   # more information, see: https://certbot.eff.org/docs/using.html#renewal
   post_renew:
+  pre_hook:
     cmds:
-      - service nginx reload
-      - service haproxy reload
+      - service nginx stop
+  post_hook:
+    cmds:
+      - service nginx start
   cron:
     minute: 10
     hour: 2
