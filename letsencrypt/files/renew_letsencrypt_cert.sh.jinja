@@ -1,10 +1,10 @@
 #!/bin/bash
 {% from "letsencrypt/map.jinja" import letsencrypt with context %}
-{% if letsencrypt.use_wrapper %}
+{%- if letsencrypt.use_wrapper %}
   {% set check_cert_cmd = '/usr/local/bin/check_letsencrypt_cert.sh' %}
 {% else %}
   {% set check_cert_cmd = '/usr/bin/certbot renew --dry-run --cert-name' %}
-{% endif %}
+{%- endif %}
 {% if letsencrypt.use_package %}
   {% set letsencrypt_command = "certbot" %}
 {% else %}
@@ -20,11 +20,12 @@ PARAMETERS="$PARAMETERS --post-hook \" + {{ letsencrypt.post_hook.cmds|join(' &&
 PARAMETERS="$PARAMETERS --pre-hook \" + {{ letsencrypt.pre_hook.cmds|join(' && ') }} \""
 {%- endif %}
 {% if letsencrypt.webroot != False -%}
-PARAMETERS="$PARAMETERS --webroot -w {{ letsencrypt.webroot.path }}"
+PARAMETERS="$PARAMETERS --webroot -webroot-path {{ letsencrypt.webroot.path }}"
 {% elif letsencrypt.dns == True -%}
 PARAMETERS="$PARAMETERS --manual --preferred-challenges dns"
 {% elif letsencrypt.standalone == True -%}
 PARAMETERS="$PARAMETERS --standalone --preferred-challenges tls-sni"
+{% endif %}
 
 if ! {{ check_cert_cmd }} "$@" > /dev/null
 then
@@ -33,10 +34,5 @@ then
         {{ letsencrypt.config_dir.path }}/live/${COMMON_NAME}/privkey.pem \
         > {{ letsencrypt.config_dir.path }}/live/${COMMON_NAME}/fullchain-privkey.pem || exit 1
     chmod 600 {{ letsencrypt.config_dir.path }}/live/${COMMON_NAME}/fullchain-privkey.pem || exit 1
-    chown {{ letsencrypt_user }}:{{ letsencrypt_group }} {{ letsencrypt.config_dir.path }}/live/${COMMON_NAME}/fullchain-privkey.pem || exit 1
-{%- if letsencrypt.post_renew.cmds %}
-  {%- for cmd in letsencrypt.post_renew.cmds %}
-    {{ cmd }}
-  {%- endfor %}
-{%- endif %}
+    chown {{ letsencrypt.config_dir.user }}:{{ letsencrypt.config_dir.group }} {{ letsencrypt.config_dir.path }}/live/${COMMON_NAME}/fullchain-privkey.pem || exit 1
 fi

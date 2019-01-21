@@ -7,7 +7,7 @@
 {{ letsencrypt.webserver.stop }}
 {% endif %}
 
-{%- for setname, domainlist in domainsets.iteritems() %}
+{%- for setname, domainlist in letsencrypt.domainsets.iteritems() %}
 {% if letsencrypt.use_wrapper %}
 /usr/local/bin/renew_letsencrypt_cert.sh {{ domainlist|join(' ') }}
 {% else %}

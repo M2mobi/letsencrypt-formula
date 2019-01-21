@@ -1,11 +1,11 @@
 #!/bin/bash
 {% from "letsencrypt/map.jinja" import letsencrypt with context %}
 
-{% if letsencrypt.use_package %}
+{%- if letsencrypt.use_package %}
   {% set letsencrypt_command = "certbot" %}
 {% else %}
   {% set letsencrypt_command = letsencrypt.cli_install_dir + "/letsencrypt-auto" %}
-{% endif %}
+{%- endif %}
 
 PARAMETERS=''
 {%- if letsencrypt.post_hook.cmds %}
@@ -15,7 +15,7 @@ PARAMETERS="$PARAMETERS --post-hook \" + {{ letsencrypt.post_hook.cmds|join(' &&
 PARAMETERS="$PARAMETERS --pre-hook \" + {{ letsencrypt.pre_hook.cmds|join(' && ') }} \""
 {%- endif %}
 {% if letsencrypt.webroot != False -%}
-PARAMETERS="$PARAMETERS --webroot -w {{ letsencrypt.webroot.path }}"
+PARAMETERS="$PARAMETERS --webroot -webroot-path {{ letsencrypt.webroot.path }}"
 {% elif letsencrypt.dns == True -%}
 PARAMETERS="$PARAMETERS --manual --preferred-challenges dns"
 {% elif letsencrypt.standalone == True -%}

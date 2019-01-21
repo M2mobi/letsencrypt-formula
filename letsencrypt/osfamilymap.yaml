@@ -2,6 +2,8 @@
 # vim: ft=yaml
 ---
 RedHat:
+  pkgs:
+    - certbot
   service: certbot-renew.timer
 FreeBSD:
   # Only used for the pkg install method (use_package: true), internal var
