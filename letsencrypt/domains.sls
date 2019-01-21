@@ -48,7 +48,7 @@
 {% if letsencrypt.webroot != False %}
 letsencrypt-webroot:
   file.directory:
-    - name: {{ webroot.path }}/.well-known
+    - name: {{ letsencrypt.webroot.path }}/.well-known
     - user: root
     - group: root
     - mode: 755
