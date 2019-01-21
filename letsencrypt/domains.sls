@@ -82,8 +82,6 @@ create-initial-cert-{{ setname }}-{{ domainlist | join('+') }}:
 {% if letsencrypt.webroot != False %}
       - file: letsencrypt-webroot
 {% endif %}
-    - require_in:
-      - file: letsencrypt-crontab
 
 letsencrypt-crontab-{{ setname }}-{{ domainlist[0] }}:
   cron.{{ old_cron_state }}:
@@ -111,15 +109,16 @@ create-fullchain-privkey-pem-for-{{ setname }}:
     - creates: {{ letsencrypt.config_dir.path }}/live/{{ setname }}/fullchain-privkey.pem
     - require:
       - cmd: create-initial-cert-{{ setname }}-{{ domainlist | join('+') }}
-
 {% endfor %}
 
+{%- set mine_query = "G@ec2_tags:account:" + salt['grains.get']('ec2_tags:account', '') + " and G@ec2_tags:environment:" + salt['grains.get']('ec2_tags:environment', '') + " and G@ec2_tags:role:webserver and G@ec2_tags:purpose:frontend and G@ec2_tags:hierarchy:secondary" %}
+{%- if salt['mine.get'](mine_query, 'name', 'compound').items()|length > 0 %}
 letsencrypt-cronjob:
   file.managed:
     - name: {{ letsencrypt_cronjob }}
     - mode: 755
     - template: jinja
-    - source: salt://letsencrypt/files/letsencrypt_cronjob.sh.jinja
+    - source: salt://letsencrypt/files/letsencrypt_sync_cronjob.sh.jinja
 
 # domainlist[0] represents the "CommonName", and the rest
 # represent SubjectAlternativeNames
@@ -135,3 +134,4 @@ letsencrypt-crontab:
     - dayweek: '*'
 {% endif %}
     - identifier: letsencrypt-cronjob
+{% endif %}
