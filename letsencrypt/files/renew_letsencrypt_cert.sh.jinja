@@ -14,10 +14,10 @@ COMMON_NAME="$1"
 
 PARAMETERS=''
 {%- if letsencrypt.post_hook.cmds %}
-PARAMETERS="$PARAMETERS --post-hook \"{{ letsencrypt.post_hook.cmds|join(' && ') }}\""
+#PARAMETERS="$PARAMETERS --post-hook \"{{ letsencrypt.post_hook.cmds|join(' && ') }}\""
 {%- endif %}
 {%- if letsencrypt.pre_hook.cmds %}
-PARAMETERS="$PARAMETERS --pre-hook \"{{ letsencrypt.pre_hook.cmds|join(' && ') }}\""
+#PARAMETERS="$PARAMETERS --pre-hook \"{{ letsencrypt.pre_hook.cmds|join(' && ') }}\""
 {%- endif %}
 {% if letsencrypt.webroot != False -%}
 PARAMETERS="$PARAMETERS --webroot -webroot-path {{ letsencrypt.webroot.path }}"
@@ -29,10 +29,16 @@ PARAMETERS="$PARAMETERS --standalone --preferred-challenges tls-sni"
 
 if ! {{ check_cert_cmd }} "$@" > /dev/null
 then
+  {%- if letsencrypt.pre_hook.cmds %}
+  {{ letsencrypt.pre_hook.cmds|join(' && ') }}
+  {%- endif %}
     {{ letsencrypt_command|indent(4,true) }} renew --non-interactive --cert-name $COMMON_NAME $PARAMETERS || exit 1
     cat {{ letsencrypt.config_dir.path }}/live/${COMMON_NAME}/fullchain.pem \
         {{ letsencrypt.config_dir.path }}/live/${COMMON_NAME}/privkey.pem \
         > {{ letsencrypt.config_dir.path }}/live/${COMMON_NAME}/fullchain-privkey.pem || exit 1
     chmod 600 {{ letsencrypt.config_dir.path }}/live/${COMMON_NAME}/fullchain-privkey.pem || exit 1
     chown {{ letsencrypt.config_dir.user }}:{{ letsencrypt.config_dir.group }} {{ letsencrypt.config_dir.path }}/live/${COMMON_NAME}/fullchain-privkey.pem || exit 1
+    {%- if letsencrypt.post_hook.cmds %}
+    {{ letsencrypt.post_hook.cmds|join(' && ') }}
+    {%- endif %}
 fi
