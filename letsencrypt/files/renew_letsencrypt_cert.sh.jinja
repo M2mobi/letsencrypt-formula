@@ -14,10 +14,10 @@ COMMON_NAME="$1"
 
 PARAMETERS=''
 {%- if letsencrypt.post_hook.cmds %}
-PARAMETERS="$PARAMETERS --post-hook \" + {{ letsencrypt.post_hook.cmds|join(' && ') }} \""
+PARAMETERS="$PARAMETERS --post-hook \"{{ letsencrypt.post_hook.cmds|join(' && ') }}\""
 {%- endif %}
 {%- if letsencrypt.pre_hook.cmds %}
-PARAMETERS="$PARAMETERS --pre-hook \" + {{ letsencrypt.pre_hook.cmds|join(' && ') }} \""
+PARAMETERS="$PARAMETERS --pre-hook \"{{ letsencrypt.pre_hook.cmds|join(' && ') }}\""
 {%- endif %}
 {% if letsencrypt.webroot != False -%}
 PARAMETERS="$PARAMETERS --webroot -webroot-path {{ letsencrypt.webroot.path }}"
