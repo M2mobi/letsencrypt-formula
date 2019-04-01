@@ -20,7 +20,7 @@ PARAMETERS=''
 #PARAMETERS="$PARAMETERS --pre-hook \"{{ letsencrypt.pre_hook.cmds|join(' && ') }}\""
 {%- endif %}
 {% if letsencrypt.webroot != False -%}
-PARAMETERS="$PARAMETERS --webroot -webroot-path {{ letsencrypt.webroot.path }}"
+PARAMETERS="$PARAMETERS --webroot --webroot-path {{ letsencrypt.webroot.path }}"
 {% elif letsencrypt.dns == True -%}
 PARAMETERS="$PARAMETERS --manual --preferred-challenges dns"
 {% elif letsencrypt.standalone == True -%}
