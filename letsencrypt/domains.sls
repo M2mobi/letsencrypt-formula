@@ -38,7 +38,7 @@
     - require:
       - file: {{ check_cert_cmd }}
 
-{{ obtain_cert_cmd }}:
+{{ create_cert_cmd }}:
   file.{{ old_obtain_cert_cmd_state }}:
     - mode: 755
     - template: jinja
@@ -77,7 +77,7 @@ create-initial-cert-{{ setname }}-{{ domainlist | join('+') }}:
       - file: letsencrypt-config
 {% if letsencrypt.use_wrapper %}
       - file: {{ check_cert_cmd }}
-      - file: {{ obtain_cert_cmd }}
+      - file: {{ create_cert_cmd }}
 {% endif %}
 {% if letsencrypt.webroot != False %}
       - file: letsencrypt-webroot
