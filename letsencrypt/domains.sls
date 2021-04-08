@@ -101,12 +101,21 @@ letsencrypt-crontab-{{ setname }}-{{ domainlist[0] }}:
 
 create-fullchain-privkey-pem-for-{{ setname }}:
   cmd.run:
+{% if letsencrypt.use_wrapper %}
+    - name: |
+        cat {{ letsencrypt.config_dir.path }}/live/{{ domainlist[0] }}/fullchain.pem \
+            {{ letsencrypt.config_dir.path }}/live/{{ domainlist[0] }}/privkey.pem \
+            > {{ letsencrypt.config_dir.path }}/live/{{ domainlist[0] }}/fullchain-privkey.pem && \
+        chmod 600 {{ letsencrypt.config_dir.path }}/live/{{ domainlist[0] }}/fullchain-privkey.pem
+    - creates: {{ letsencrypt.config_dir.path }}/live/{{ domainlist[0] }}/fullchain-privkey.pem
+{% else %}
     - name: |
         cat {{ letsencrypt.config_dir.path }}/live/{{ setname }}/fullchain.pem \
             {{ letsencrypt.config_dir.path }}/live/{{ setname }}/privkey.pem \
             > {{ letsencrypt.config_dir.path }}/live/{{ setname }}/fullchain-privkey.pem && \
         chmod 600 {{ letsencrypt.config_dir.path }}/live/{{ setname }}/fullchain-privkey.pem
     - creates: {{ letsencrypt.config_dir.path }}/live/{{ setname }}/fullchain-privkey.pem
+{% endif %}
     - require:
       - cmd: create-initial-cert-{{ setname }}-{{ domainlist | join('+') }}
 {% endfor %}
