@@ -23,7 +23,7 @@ PARAMETERS=''
 PARAMETERS="$PARAMETERS --webroot --webroot-path {{ letsencrypt.webroot.path }}"
 {% elif letsencrypt.dns == True -%}
 PARAMETERS="$PARAMETERS --manual --preferred-challenges dns"
-{% elif letsencrypt.dns-route53 == True -%}
+{% elif letsencrypt.get('dns-route53') == True -%}
 PARAMETERS="$PARAMETERS --dns-route53"
 {% elif letsencrypt.standalone == True -%}
 PARAMETERS="$PARAMETERS --standalone --preferred-challenges tls-sni"

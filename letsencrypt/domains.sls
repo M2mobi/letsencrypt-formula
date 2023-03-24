@@ -28,19 +28,19 @@
   file.{{ old_check_cert_cmd_state }}:
     - template: jinja
     - source: salt://letsencrypt/files/check_letsencrypt_cert.sh.jinja
-    - mode: 755
+    - mode: '0755'
 
 {{ renew_cert_cmd }}:
   file.{{ old_renew_cert_cmd_state }}:
     - template: jinja
     - source: salt://letsencrypt/files/renew_letsencrypt_cert.sh.jinja
-    - mode: 755
+    - mode: '0755'
     - require:
       - file: {{ check_cert_cmd }}
 
 {{ create_cert_cmd }}:
   file.{{ old_obtain_cert_cmd_state }}:
-    - mode: 755
+    - mode: '0755'
     - template: jinja
     - source: salt://letsencrypt/files/obtain_letsencrypt_cert.sh.jinja
 {% endif %}
@@ -51,7 +51,7 @@ letsencrypt-webroot:
     - name: {{ letsencrypt.webroot.path }}/.well-known
     - user: root
     - group: root
-    - mode: 755
+    - mode: '0755'
 {% endif %}
 
 {% for setname, domainlist in letsencrypt.domainsets.items() %}
@@ -120,12 +120,14 @@ create-fullchain-privkey-pem-for-{{ setname }}:
       - cmd: create-initial-cert-{{ setname }}-{{ domainlist | join('+') }}
 {% endfor %}
 
-{%- set mine_query = "G@ec2_tags:account:" + salt['grains.get']('ec2_tags:account', '') + " and G@ec2_tags:environment:" + salt['grains.get']('ec2_tags:environment', '') + " and G@ec2_tags:role:webserver and G@ec2_tags:purpose:frontend and G@ec2_tags:hierarchy:secondary" %}
+{%- set mine_query = "G@ec2_tags:account:" + salt['grains.get']('ec2_tags:account', '') +
+                    " and G@ec2_tags:environment:" + salt['grains.get']('ec2_tags:environment', '') +
+                    " and G@ec2_tags:role:webserver and G@ec2_tags:purpose:frontend and G@ec2_tags:hierarchy:secondary" %}
 {%- if salt['mine.get'](mine_query, 'name', 'compound').items()|length > 0 %}
 letsencrypt-cronjob:
   file.managed:
     - name: {{ letsencrypt_cronjob }}
-    - mode: 755
+    - mode: '0755'
     - template: jinja
     - source: salt://letsencrypt/files/letsencrypt_sync_cronjob.sh.jinja
 
