@@ -25,6 +25,15 @@ PARAMETERS="$PARAMETERS --standalone --preferred-challenges tls-sni"
 {% endif -%}
 LOG_FILE='/var/log/letsencrypt/letsencrypt.log'
 
+{% if 'route53' in letsencrypt %}
+{% if 'user' in letsencrypt.route53 %}
+export AWS_ACCESS_KEY_ID="{{ letsencrypt.route53.user.key }}"
+export AWS_SECRET_ACCESS_KEY="{{ letsencrypt.route53.user.secret }}"
+{% elif 'configfile' in letsencrypt.route53 %}
+export AWS_CONFIG_FILE="{{ letsencrypt.route53.configfile }}"
+{% endif -%}
+{% endif -%}
+
 [ ! -d '/var/log/letsencrypt/' ] && mkdir '/var/log/letsencrypt'
 
 for DOMAIN in "$@"
