@@ -120,10 +120,8 @@ create-fullchain-privkey-pem-for-{{ setname }}:
       - cmd: create-initial-cert-{{ setname }}-{{ domainlist | join('+') }}
 {% endfor %}
 
-{%- set mine_query = "G@ec2_tags:account:" + salt['grains.get']('ec2_tags:account', '') +
-                    " and G@ec2_tags:environment:" + salt['grains.get']('ec2_tags:environment', '') +
-                    " and G@ec2_tags:role:webserver and G@ec2_tags:purpose:frontend and G@ec2_tags:hierarchy:secondary" %}
-{%- if salt['mine.get'](mine_query, 'name', 'compound').items()|length > 0 %}
+{%- set mine_query = letsencrypt.sync.query.replace('\n', '') %}
+{%- if letsencrypt.sync.enabled and salt['mine.get'](mine_query, 'name', 'compound').items()|length > 0 %}
 letsencrypt-cronjob:
   file.managed:
     - name: {{ letsencrypt_cronjob }}
