@@ -121,13 +121,19 @@ create-fullchain-privkey-pem-for-{{ setname }}:
 {% endfor %}
 
 {%- set mine_query = letsencrypt.sync.query.replace('\n', '') %}
-{%- if letsencrypt.sync.enabled and salt['mine.get'](mine_query, 'name', 'compound').items()|length > 0 %}
+{%- set minions = salt['mine.get'](mine_query, 'name', 'compound') %}
+{%- if letsencrypt.sync.enabled and minions.items()|length > 0 %}
+rsync:
+  pkg.installed
+
 letsencrypt-cronjob:
   file.managed:
     - name: {{ letsencrypt_cronjob }}
     - mode: '0755'
     - template: jinja
     - source: salt://letsencrypt/files/letsencrypt_sync_cronjob.sh.jinja
+    - context:
+        data: {{ minions|json }}
 
 # domainlist[0] represents the "CommonName", and the rest
 # represent SubjectAlternativeNames

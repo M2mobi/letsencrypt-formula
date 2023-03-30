@@ -1,10 +1,6 @@
-{%- from "letsencrypt/map.jinja" import letsencrypt with context %}
-{%- set account = salt['grains.get']('ec2_tags:account', '') -%}
-{%- set environment = salt['grains.get']('ec2_tags:environment', '') -%}
+{% from "letsencrypt/map.jinja" import letsencrypt with context %}
 #!/bin/bash
-
-{%- set mine_query = "G@ec2_tags:account:" + account + " and G@ec2_tags:environment:" + environment + " and G@ec2_tags:role:webserver and G@ec2_tags:purpose:frontend and G@ec2_tags:hierarchy:secondary" %}
-{%- for minion, hostname in salt['mine.get'](mine_query, 'name', 'compound').items() %}
-rsync -lr -e 'ssh -i /home/letsencrypt/.ssh/id_rsa' /etc/letsencrypt/archive letsencrypt@{{ hostname }}:/etc/letsencrypt/
-rsync -lr -e 'ssh -i /home/letsencrypt/.ssh/id_rsa' /etc/letsencrypt/live letsencrypt@{{ hostname }}:/etc/letsencrypt/
+{%- for _, hostname in data.items() %}
+rsync -lr -e 'ssh -i /home/letsencrypt/.ssh/id_rsa' {{ letsencrypt.config_dir.path }}/archive letsencrypt@{{ hostname }}:{{ letsencrypt.config_dir.path }}/
+rsync -lr -e 'ssh -i /home/letsencrypt/.ssh/id_rsa' {{ letsencrypt.config_dir.path }}/live letsencrypt@{{ hostname }}:{{ letsencrypt.config_dir.path }}/
 {%- endfor %}
