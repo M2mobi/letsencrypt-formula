@@ -1,6 +1,6 @@
 {% from "letsencrypt/map.jinja" import letsencrypt with context %}
 #!/bin/bash
 {%- for _, hostname in data.items() %}
-rsync -lr -e 'ssh -i /home/letsencrypt/.ssh/id_rsa' {{ letsencrypt.config_dir.path }}/archive letsencrypt@{{ hostname }}:{{ letsencrypt.config_dir.path }}/
-rsync -lr -e 'ssh -i /home/letsencrypt/.ssh/id_rsa' {{ letsencrypt.config_dir.path }}/live letsencrypt@{{ hostname }}:{{ letsencrypt.config_dir.path }}/
+rsync --links --recursive --no-motd --rsh='ssh -i /home/letsencrypt/.ssh/id_rsa' {{ letsencrypt.config_dir.path }}/archive letsencrypt@{{ hostname }}:{{ letsencrypt.config_dir.path }}/
+rsync --links --recursive --no-motd --rsh='ssh -i /home/letsencrypt/.ssh/id_rsa' {{ letsencrypt.config_dir.path }}/live letsencrypt@{{ hostname }}:{{ letsencrypt.config_dir.path }}/
 {%- endfor %}
