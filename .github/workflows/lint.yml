@@ -1,0 +1,6 @@
+name: 'Check'
+on:
+  push
+jobs:
+  pipeline:
+    uses: move-sysadmin/actions/.github/workflows/saltstack.yml@main
