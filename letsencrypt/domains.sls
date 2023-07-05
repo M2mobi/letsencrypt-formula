@@ -54,7 +54,7 @@ letsencrypt-webroot:
     - mode: '0755'
 {% endif %}
 
-{% for setname, domainlist in letsencrypt.domainsets.items() %}
+{% for setname, domainlist in letsencrypt.get('domainsets', {}).items() %}
 # domainlist[0] represents the "CommonName", and the rest
 # represent SubjectAlternativeNames
 create-initial-cert-{{ setname }}-{{ domainlist | join('+') }}:
